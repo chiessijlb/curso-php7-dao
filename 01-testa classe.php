@@ -1,5 +1,5 @@
 <?php 
-require_once( "config.php" );
+require_once( "_config.php" );
 
 // Testa a conexão com a classe
 $sql = new sql();

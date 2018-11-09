@@ -1,5 +1,5 @@
 <?php 
-require_once( "config.php" );
+require_once( "_config.php" );
 
 // Carrega um usuário
 $root = new Usuario();
