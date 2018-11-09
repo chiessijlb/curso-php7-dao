@@ -5,6 +5,19 @@ class Usuario {
 	private $dessenha;
 	private $dtcadastro;
 
+   // Método construtor
+   public function __construct( $login = "", $password = "" ) {
+		$this->setDeslogin( $login );
+		$this->setDessenha( $password );
+	}
+
+	public function __toString() {
+      return json_encode( array( "idusuario" => $this->getIdusuario(),
+                                 "deslogin" => $this->getDeslogin(),
+                                 "dessenha" => $this->getDessenha(),
+                                 "dtcadastro" => $this->getDtcadastro()->format( "d/m/Y H:i:s" ) ) );
+	}
+
    // getters
 	public function getIdusuario() {
 		return $this->idusuario;
@@ -41,6 +54,14 @@ class Usuario {
 
    // ======================================================
    
+	public function setData( $data ) {
+		$this->setIdusuario( $data[ 'idusuario' ] );
+		$this->setDeslogin( $data[ 'deslogin' ] );
+		$this->setDessenha( $data[ 'dessenha' ] );
+		$this->setDtcadastro( new DateTime( $data[ 'dtcadastro' ] ) );
+	}
+
+   // Carrega um registro pela ID
 	public function loadById( $id ) {
 		$sql    = new Sql();
 		$result = $sql->select( "SELECT * FROM tb_usuarios WHERE idusuario = :ID;", array( ":ID" => $id ) );
@@ -50,12 +71,17 @@ class Usuario {
 		}
 	}
 
+   // Carrega uma lista de registros.
+   // Método criado como  estático por não possuir chamadas a atributos e métodos da classe ($this->),
+   // assim pode ser chamado sem a necessidade de instanciar a classe.
 	public static function getList() {
 		$sql = new Sql();
 
+      // Como não existem parâmetros a serem passados, select() recebeu apenas a string SQL.
 		return $sql->select( "SELECT * FROM tb_usuarios ORDER BY deslogin;" );
 	}
 
+   // Efetua busca pelo campo do login de usuário
 	public static function search( $login ) {
 		$sql = new Sql();
 
@@ -63,6 +89,7 @@ class Usuario {
                            array( ':SEARCH' => "%" . $login . "%" ) );
 	}
 
+   // Carrega o registro com autenticação de usuário e senha
 	public function login( $login, $password ) {
 		$sql    = new Sql();
       $result = $sql->select( "SELECT * FROM tb_usuarios WHERE deslogin = :LOGIN AND dessenha = :PASSWORD;",
@@ -75,15 +102,11 @@ class Usuario {
 		}
 	}
 
-	public function setData( $data ) {
-		$this->setIdusuario( $data[ 'idusuario' ] );
-		$this->setDeslogin( $data[ 'deslogin' ] );
-		$this->setDessenha( $data[ 'dessenha' ] );
-		$this->setDtcadastro( new DateTime( $data[ 'dtcadastro' ] ) );
-	}
-
+   // Insere um registro na tabela
 	public function insert() {
-		$sql    = new Sql();
+      $sql = new Sql();
+
+      // CALL é usado para executar procedures do MySQL. No SQL Server é EXECUTE
       $result = $sql->select( "CALL sp_usuarios_insert( :LOGIN, :PASSWORD )",
                                array( ':LOGIN' => $this->getDeslogin(), ':PASSWORD' => $this->getDessenha() ) );
 
@@ -92,6 +115,7 @@ class Usuario {
 		}
 	}
 
+   // Altera um registro específico na tabela
 	public function update( $login, $password ) {
 		$this->setDeslogin( $login );
 		$this->setDessenha( $password );
@@ -102,6 +126,7 @@ class Usuario {
                    array( ':LOGIN' => $this->getDeslogin(), ':PASSWORD' => $this->getDessenha(), ':ID' => $this->getIdusuario() ) );
 	}
 
+   // Exclui um registro da tabela
 	public function delete() {
 		$sql = new Sql();
 
@@ -111,18 +136,6 @@ class Usuario {
 		$this->setDeslogin( "" );
 		$this->setDessenha( "" );
 		$this->setDtcadastro( new DateTime() );
-	}
-
-	public function __construct( $login = "", $password = "" ) {
-		$this->setDeslogin( $login );
-		$this->setDessenha( $password );
-	}
-
-	public function __toString() {
-      return json_encode( array( "idusuario" => $this->getIdusuario(),
-                                 "deslogin" => $this->getDeslogin(),
-                                 "dessenha" => $this->getDessenha(),
-                                 "dtcadastro" => $this->getDtcadastro()->format( "d/m/Y H:i:s" ) ) );
 	}
 } 	
 ?>
